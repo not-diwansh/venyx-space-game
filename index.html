@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venyx Space Escape</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    overflow:hidden;
+    background:
+    radial-gradient(circle at top,#020617,#000000);
+    color:white;
+}
+
+body::before{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-image:
+    radial-gradient(white 1px, transparent 1px);
+
+    background-size:50px 50px;
+
+    opacity:.12;
+
+    animation:stars 20s linear infinite;
+}
+
+@keyframes stars{
+
+    from{
+        transform:translateY(0);
+    }
+
+    to{
+        transform:translateY(50px);
+    }
+}
+
+.topbar{
+    position:absolute;
+
+    top:15px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    width:92%;
+
+    padding:18px 30px;
+
+    border-radius:24px;
+
+    background:
+    rgba(10,15,30,.72);
+
+    backdrop-filter:blur(14px);
+
+    border:
+    1px solid rgba(255,255,255,.08);
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    z-index:1000;
+
+    box-shadow:
+    0 0 30px rgba(56,189,248,.15);
+}
+
+.logo{
+    font-size:34px;
+
+    font-weight:bold;
+
+    letter-spacing:4px;
+
+    color:#38bdf8;
+
+    text-shadow:
+    0 0 20px #38bdf8;
+}
+
+.stats{
+    display:flex;
+
+    gap:18px;
+}
+
+.card{
+    background:
+    rgba(255,255,255,.05);
+
+    border:
+    1px solid rgba(255,255,255,.08);
+
+    padding:10px 18px;
+
+    border-radius:16px;
+
+    min-width:110px;
+
+    text-align:center;
+}
+
+.card h3{
+    font-size:13px;
+
+    opacity:.7;
+}
+
+.card p{
+    font-size:24px;
+
+    color:#38bdf8;
+
+    margin-top:5px;
+}
+
+.game{
+    width:100vw;
+    height:100vh;
+    position:relative;
+    overflow:hidden;
+}
+
+.player{
+    width:90px;
+    height:90px;
+
+    position:absolute;
+
+    bottom:40px;
+    left:50%;
+
+    transform:
+    translateX(-50%);
+
+    background-image:
+    url('https://cdn-icons-png.flaticon.com/512/2949/2949016.png');
+
+    background-size:contain;
+
+    background-repeat:no-repeat;
+
+    background-position:center;
+
+    filter:
+    drop-shadow(0 0 20px #38bdf8);
+
+    z-index:10;
+}
+
+.enemy{
+    position:absolute;
+
+    top:-120px;
+
+    background-image:
+    url('https://images.unsplash.com/photo-1446776877081-d282a0f896e2?q=80&w=500');
+
+    background-size:cover;
+
+    background-position:center;
+
+    background-repeat:no-repeat;
+
+    filter:
+    drop-shadow(0 0 20px orange);
+
+    animation:
+    spinRock linear infinite;
+
+    box-shadow:
+    inset -10px -10px 20px rgba(0,0,0,0.45),
+    inset 10px 10px 20px rgba(255,255,255,0.05),
+    0 0 25px rgba(255,140,0,0.4);
+}
+
+@keyframes spinRock{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.coin{
+    width:38px;
+    height:38px;
+
+    position:absolute;
+
+    border-radius:50%;
+
+    background:
+    radial-gradient(circle,#fff6a3,#facc15);
+
+    box-shadow:
+    0 0 25px gold;
+
+    animation:
+    spin 1s linear infinite;
+}
+
+@keyframes spin{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.pauseMenu{
+    position:absolute;
+
+    width:100%;
+    height:100%;
+
+    background:
+    rgba(0,0,0,.7);
+
+    backdrop-filter:blur(10px);
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:5000;
+}
+
+.pauseBox{
+    width:500px;
+
+    max-height:85vh;
+
+    overflow:auto;
+
+    padding:40px;
+
+    border-radius:25px;
+
+    background:
+    rgba(15,23,42,.95);
+
+    border:
+    1px solid rgba(255,255,255,.08);
+
+    text-align:center;
+
+    box-shadow:
+    0 0 40px rgba(56,189,248,.25);
+}
+
+.pauseBox h1{
+    font-size:55px;
+
+    color:#38bdf8;
+
+    margin-bottom:20px;
+}
+
+.pauseBox button{
+    width:100%;
+
+    margin-top:16px;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:
+    linear-gradient(135deg,#38bdf8,#2563eb);
+
+    color:white;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.pauseBox button:hover{
+    transform:scale(1.04);
+}
+
+.shipGrid{
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:15px;
+
+    margin-top:20px;
+}
+
+.shipGrid img{
+    width:90px;
+    height:90px;
+
+    object-fit:contain;
+
+    padding:10px;
+
+    border-radius:18px;
+
+    background:
+    rgba(255,255,255,.05);
+
+    border:
+    1px solid rgba(255,255,255,.08);
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.shipGrid img:hover{
+    transform:scale(1.08);
+
+    box-shadow:
+    0 0 20px #38bdf8;
+}
+
+.slider{
+    width:100%;
+
+    margin-top:20px;
+}
+
+.gameover{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:
+    translate(-50%,-50%);
+
+    text-align:center;
+
+    z-index:9000;
+}
+
+.gameover h1{
+    font-size:85px;
+
+    text-shadow:
+    0 0 20px red;
+}
+
+.gameover button{
+    margin-top:20px;
+
+    padding:15px 35px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#38bdf8;
+
+    color:white;
+
+    font-size:22px;
+
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<audio
+id="music"
+loop
+src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4c526eac10.mp3">
+</audio>
+
+<div class="topbar">
+
+    <div class="logo">
+        VENYX SPACE
+    </div>
+
+    <div class="stats">
+
+        <div class="card">
+            <h3>SCORE</h3>
+            <p id="score">0</p>
+        </div>
+
+        <div class="card">
+            <h3>LIVES</h3>
+            <p id="lives">3</p>
+        </div>
+
+        <div class="card">
+            <h3>HIGH</h3>
+            <p id="highscore">0</p>
+        </div>
+
+        <div class="card">
+            <h3>SPEED</h3>
+            <p id="speed">1x</p>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="pauseMenu" id="pauseMenu">
+
+    <div class="pauseBox">
+
+        <h1>PAUSED</h1>
+
+        <button onclick="resumeGame()">
+            Resume
+        </button>
+
+        <button onclick="toggleTopBar()">
+            Toggle Top Bar
+        </button>
+
+        <button onclick="location.reload()">
+            Restart
+        </button>
+
+        <h2 style="
+        margin-top:30px;
+        color:#38bdf8;
+        ">
+            Lock Speed
+        </h2>
+
+        <input
+        type="range"
+        min="1"
+        max="10"
+        value="1"
+        class="slider"
+        id="speedSlider">
+
+        <p style="
+        margin-top:10px;
+        font-size:22px;
+        ">
+            <span id="sliderValue">
+                1
+            </span>x
+        </p>
+
+        <h2 style="
+        margin-top:30px;
+        color:#38bdf8;
+        ">
+            Choose Spaceship
+        </h2>
+
+        <div class="shipGrid">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/2949/2949016.png"
+            onclick="changeShip(this.src)">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png"
+            onclick="changeShip(this.src)">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3659/3659899.png"
+            onclick="changeShip(this.src)">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3659/3659784.png"
+            onclick="changeShip(this.src)">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3659/3659804.png"
+            onclick="changeShip(this.src)">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3659/3659898.png"
+            onclick="changeShip(this.src)">
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="game" id="game">
+
+    <div class="player" id="player"></div>
+
+</div>
+
+<script>
+const game =
+document.getElementById("game");
+
+const player =
+document.getElementById("player");
+
+const pauseMenu =
+document.getElementById("pauseMenu");
+
+const topbar =
+document.querySelector(".topbar");
+
+const scoreText =
+document.getElementById("score");
+
+const livesText =
+document.getElementById("lives");
+
+const highscoreText =
+document.getElementById("highscore");
+
+const speedText =
+document.getElementById("speed");
+
+const slider =
+document.getElementById("speedSlider");
+
+const sliderValue =
+document.getElementById("sliderValue");
+
+const music =
+document.getElementById("music");
+
+music.volume = 0.25;
+
+document.body.addEventListener(
+"click",
+()=>{
+    music.play();
+},
+{once:true}
+);
+
+let playerX =
+window.innerWidth/2 - 45;
+
+let score = 0;
+
+let lives = 3;
+
+let speedMultiplier = 1;
+
+let lockedSpeed = 1;
+
+let gameRunning = true;
+
+let paused = false;
+
+let highscore =
+localStorage.getItem(
+"spaceHighscore"
+) || 0;
+
+highscoreText.textContent =
+highscore;
+
+slider.addEventListener(
+"input",
+()=>{
+
+    lockedSpeed =
+    parseFloat(slider.value);
+
+    sliderValue.textContent =
+    lockedSpeed;
+
+    speedMultiplier =
+    lockedSpeed;
+
+    speedText.textContent =
+    lockedSpeed + "x";
+});
+
+window.addEventListener(
+"mousemove",
+(e)=>{
+
+    if(!gameRunning || paused)
+    return;
+
+    playerX =
+    e.clientX - 45;
+
+    if(playerX < 0){
+        playerX = 0;
+    }
+
+    if(playerX >
+    window.innerWidth - 90){
+
+        playerX =
+        window.innerWidth - 90;
+    }
+
+    player.style.left =
+    playerX + "px";
+});
+
+window.addEventListener(
+"keydown",
+(e)=>{
+
+    if(e.key === "Escape"){
+
+        paused = !paused;
+
+        if(paused){
+
+            pauseMenu.style.display =
+            "flex";
+
+        }else{
+
+            pauseMenu.style.display =
+            "none";
+        }
+    }
+});
+
+function resumeGame(){
+
+    paused = false;
+
+    pauseMenu.style.display =
+    "none";
+}
+
+function changeShip(src){
+
+    player.style.backgroundImage =
+    `url(${src})`;
+
+    localStorage.setItem(
+    "selectedShip",
+    src
+    );
+}
+
+const savedShip =
+localStorage.getItem(
+"selectedShip"
+);
+
+if(savedShip){
+
+    player.style.backgroundImage =
+    `url(${savedShip})`;
+}
+
+function toggleTopBar(){
+
+    if(
+    topbar.style.display
+    === "none"
+    ){
+
+        topbar.style.display =
+        "flex";
+
+    }else{
+
+        topbar.style.display =
+        "none";
+    }
+}
+
+function createEnemy(){
+
+    if(!gameRunning) return;
+
+    const enemy =
+    document.createElement("div");
+
+    enemy.classList.add("enemy");
+
+    const size =
+    50 + Math.random() * 70;
+
+    enemy.style.width =
+    size + "px";
+
+    enemy.style.height =
+    size + "px";
+
+    enemy.style.left =
+    Math.random() *
+    (window.innerWidth - size)
+    + "px";
+
+    const shapes = [
+
+    "50% 50% 45% 55% / 58% 43% 57% 42%",
+
+    "61% 39% 55% 45% / 44% 59% 41% 56%",
+
+    "40% 60% 35% 65% / 55% 35% 65% 45%",
+
+    "53% 47% 63% 37% / 37% 45% 55% 63%",
+
+    "65% 35% 60% 40% / 45% 60% 40% 55%"
+
+    ];
+
+    enemy.style.borderRadius =
+    shapes[
+        Math.floor(
+            Math.random()
+            * shapes.length
+        )
+    ];
+
+    enemy.style.animationDuration =
+    (2 + Math.random()*3)
+    + "s";
+
+    game.appendChild(enemy);
+
+    let y = -120;
+
+    let speed =
+    (5 + Math.random()*6)
+    * speedMultiplier;
+
+    function move(){
+
+        if(!gameRunning)
+        return;
+
+        if(paused){
+
+            requestAnimationFrame(
+            move
+            );
+
+            return;
+        }
+
+        y += speed;
+
+        enemy.style.top =
+        y + "px";
+
+        const p =
+        player.getBoundingClientRect();
+
+        const e =
+        enemy.getBoundingClientRect();
+
+        if(
+            p.left < e.right &&
+            p.right > e.left &&
+            p.top < e.bottom &&
+            p.bottom > e.top
+        ){
+
+            const hit =
+            new Audio(
+            "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b50d80c5.mp3"
+            );
+
+            hit.volume = 0.5;
+
+            hit.play();
+
+            enemy.remove();
+
+            lives--;
+
+            livesText.textContent =
+            lives;
+
+            if(lives <= 0){
+
+                endGame();
+            }
+
+            return;
+        }
+
+        if(y > window.innerHeight){
+
+            enemy.remove();
+
+            score++;
+
+            scoreText.textContent =
+            score;
+
+            return;
+        }
+
+        requestAnimationFrame(move);
+    }
+
+    move();
+}
+
+function createCoin(){
+
+    const coin =
+    document.createElement("div");
+
+    coin.classList.add("coin");
+
+    coin.style.left =
+    Math.random() *
+    (window.innerWidth - 40)
+    + "px";
+
+    game.appendChild(coin);
+
+    let y = -50;
+
+    function move(){
+
+        if(paused){
+
+            requestAnimationFrame(
+            move
+            );
+
+            return;
+        }
+
+        y += 6;
+
+        coin.style.top =
+        y + "px";
+
+        const p =
+        player.getBoundingClientRect();
+
+        const c =
+        coin.getBoundingClientRect();
+
+        if(
+            p.left < c.right &&
+            p.right > c.left &&
+            p.top < c.bottom &&
+            p.bottom > c.top
+        ){
+
+            const coinAudio =
+            new Audio(
+            "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c87468a0a0.mp3"
+            );
+
+            coinAudio.volume = 0.4;
+
+            coinAudio.play();
+
+            coin.remove();
+
+            if(lives < 5){
+                lives++;
+            }
+
+            livesText.textContent =
+            lives;
+
+            return;
+        }
+
+        if(y > window.innerHeight){
+
+            coin.remove();
+
+            return;
+        }
+
+        requestAnimationFrame(move);
+    }
+
+    move();
+}
+
+const enemyLoop =
+setInterval(()=>{
+
+    if(gameRunning && !paused){
+
+        createEnemy();
+
+        if(score > 20){
+            createEnemy();
+        }
+
+        if(score > 60){
+            createEnemy();
+        }
+    }
+
+},450);
+
+const coinLoop =
+setInterval(()=>{
+
+    if(gameRunning && !paused){
+
+        if(Math.random() > 0.65){
+
+            createCoin();
+        }
+    }
+
+},7000);
+
+function endGame(){
+
+    gameRunning = false;
+
+    clearInterval(enemyLoop);
+
+    clearInterval(coinLoop);
+
+    if(score > highscore){
+
+        localStorage.setItem(
+        "spaceHighscore",
+        score
+        );
+
+        highscore = score;
+    }
+
+    const over =
+    document.createElement("div");
+
+    over.classList.add(
+    "gameover"
+    );
+
+    over.innerHTML = `
+    <h1>GAME OVER</h1>
+
+    <div style="
+    font-size:30px;
+    margin-top:20px;
+    ">
+        Score: ${score}
+    </div>
+
+    <div style="
+    font-size:30px;
+    margin-top:10px;
+    ">
+        Highscore: ${highscore}
+    </div>
+
+    <button onclick="location.reload()">
+        Play Again
+    </button>
+    `;
+
+    game.appendChild(over);
+}
+</script>
+
+</body>
+</html>
